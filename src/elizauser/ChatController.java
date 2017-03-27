@@ -5,7 +5,6 @@
  */
 package elizauser;
 
-import java.net.DatagramPacket;
 import java.net.URL;
 import java.util.ResourceBundle;
 import javafx.animation.FadeTransition;
@@ -65,6 +64,7 @@ public class ChatController implements Initializable {
 
     private CommandReceive commandReceive;
     private String ip = "127.0.0.1";
+    private Boolean ipLimit = true;
 
     int rowIndex = 0;
     int colIndex = 2;
@@ -80,11 +80,7 @@ public class ChatController implements Initializable {
     @Override
     public void initialize(URL location, ResourceBundle resources) {
         chatController = this;
-//         recmd = new CommandControl(7770, "134.96.240.240" ,8880);
-//        recmd = new CommandControl(7770, ip, 8880);
-//        recmd.start();
-//        commandReceive = new CommandReceive(recmd, this);
-//        commandReceive.start();
+
         chatGridPane = new GridPane();
         chatScrollPane.setContent(chatGridPane);
         chatScrollPane.setStyle("-fx-background: #FFFFFF; -fx-border-color: #FFFFFF;");
@@ -113,28 +109,68 @@ public class ChatController implements Initializable {
                 handSendButton();
             }
         });
-        
+
         connectButton.setOnAction(new EventHandler<ActionEvent>() {
             @Override
             public void handle(ActionEvent event) {
-                String ipaddress = ipAddress.getText();
-                if (ipaddress != null && !ipaddress.isEmpty()) {
-                    ip = ipaddress;
+                if (ipLimit) {
+                    String ipaddress = ipAddress.getText();
+                    if (ipaddress != null && !ipaddress.isEmpty()) {
+                        ip = ipaddress;
+                    }
+                    recmd = new CommandControl(7770, ip, 8880);
+                    recmd.start();
+                    commandReceive = new CommandReceive(recmd, chatController);
+                    commandReceive.start();
+                    ipLimit = false;
                 }
-                recmd = new CommandControl(7770, ip, 8880);
-                recmd.start();
-                commandReceive = new CommandReceive(recmd, chatController);
-                commandReceive.start();
             }
         });
-
     }
 
     public void handSendButton() {
-        synchronized (lock) {
-            String s = inputTextArea.getText();
-            inputTextArea.setText("");
-            if (s != null && !s.isEmpty()) {
+        if (!ipLimit) {
+            synchronized (lock) {
+                String s = inputTextArea.getText();
+                inputTextArea.setText("");
+                if (s != null && !s.isEmpty()) {
+                    messages = new Label(s);
+                    messages.setFont(new Font("Arial", 30));
+                    messages.setWrapText(true);
+                    messages.setPadding(new Insets(5, 5, 5, 5));
+                    messages.setMaxWidth(800);
+                    messages.setVisible(false);
+
+                    HBox box = new HBox();
+                    Path face;
+                    createUserMessageStyle(messages);
+                    cc.setHalignment(HPos.LEFT);
+                    box.setAlignment(Pos.CENTER_RIGHT);
+                    GridPane.setHalignment(box, HPos.RIGHT);
+                    face = creatRightFace(Color.rgb(255, 132, 202));
+                    face.setVisible(false);
+                    box.getChildren().addAll(messages, face);
+                    createFadeEffect(fadeMessage, messages);
+                    createFadeEffect(fadePath, face);
+                    pt.getChildren().clear();
+                    pt.getChildren().addAll(fadeMessage, fadePath);
+                    Platform.runLater(()
+                            -> {
+                        chatGridPane.add(box, 1, rowIndex);
+                        messages.setVisible(true);
+                        face.setVisible(true);
+                        pt.play();
+                    });
+                    rowIndex++;
+                    recmd.sendString(s);
+                }
+            }
+        }
+    }
+
+    public void handReceive(String s) {
+        if (!ipLimit) {
+            synchronized (lock) {
                 messages = new Label(s);
                 messages.setFont(new Font("Arial", 30));
                 messages.setWrapText(true);
@@ -144,60 +180,26 @@ public class ChatController implements Initializable {
 
                 HBox box = new HBox();
                 Path face;
-                createUserMessageStyle(messages);
+                createSystemMessageStyle(messages);
                 cc.setHalignment(HPos.LEFT);
-                box.setAlignment(Pos.CENTER_RIGHT);
-                GridPane.setHalignment(box, HPos.RIGHT);
-                face = creatRightFace(Color.rgb(255, 132, 202));
+                box.setAlignment(Pos.CENTER_LEFT);
+                GridPane.setHalignment(box, HPos.LEFT);
+                face = createLeftFace(Color.rgb(222, 222, 222));
                 face.setVisible(false);
-                box.getChildren().addAll(messages, face);
+                box.getChildren().addAll(face, messages);
                 createFadeEffect(fadeMessage, messages);
                 createFadeEffect(fadePath, face);
                 pt.getChildren().clear();
                 pt.getChildren().addAll(fadeMessage, fadePath);
                 Platform.runLater(()
                         -> {
-                    chatGridPane.add(box, 1, rowIndex);
+                    chatGridPane.add(box, 0, rowIndex);
                     messages.setVisible(true);
                     face.setVisible(true);
                     pt.play();
                 });
                 rowIndex++;
-                recmd.sendString(s);
             }
-        }
-    }
-
-    public void handReceive(String s) {
-        synchronized (lock) {
-            messages = new Label(s);
-            messages.setFont(new Font("Arial", 30));
-            messages.setWrapText(true);
-            messages.setPadding(new Insets(5, 5, 5, 5));
-            messages.setMaxWidth(800);
-            messages.setVisible(false);
-
-            HBox box = new HBox();
-            Path face;
-            createSystemMessageStyle(messages);
-            cc.setHalignment(HPos.LEFT);
-            box.setAlignment(Pos.CENTER_LEFT);
-            GridPane.setHalignment(box, HPos.LEFT);
-            face = createLeftFace(Color.rgb(222, 222, 222));
-            face.setVisible(false);
-            box.getChildren().addAll(face, messages);
-            createFadeEffect(fadeMessage, messages);
-            createFadeEffect(fadePath, face);
-            pt.getChildren().clear();
-            pt.getChildren().addAll(fadeMessage, fadePath);
-            Platform.runLater(()
-                    -> {
-                chatGridPane.add(box, 0, rowIndex);
-                messages.setVisible(true);
-                face.setVisible(true);
-                pt.play();
-            });
-            rowIndex++;
         }
     }
 
@@ -260,5 +262,4 @@ public class ChatController implements Initializable {
 
         return p;
     }
-
 }

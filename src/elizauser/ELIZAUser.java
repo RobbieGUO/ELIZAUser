@@ -7,14 +7,13 @@ package elizauser;
 
 import java.io.IOException;
 import javafx.application.Application;
-import javafx.event.ActionEvent;
+import javafx.application.Platform;
 import javafx.event.EventHandler;
 import javafx.fxml.FXMLLoader;
 import javafx.scene.Scene;
-import javafx.scene.control.Button;
 import javafx.scene.layout.AnchorPane;
-import javafx.scene.layout.StackPane;
 import javafx.stage.Stage;
+import javafx.stage.WindowEvent;
 
 /**
  *
@@ -47,6 +46,15 @@ public class ELIZAUser extends Application {
             // Show the scene containing the root layout.
             Scene scene = new Scene(rootLayout);
             primaryStage.setScene(scene);
+
+            primaryStage.setOnCloseRequest(new EventHandler<WindowEvent>() {
+                @Override
+                public void handle(WindowEvent t) {
+                    Platform.exit();
+                    System.exit(0);
+                }
+            });
+
             primaryStage.show();
         } catch (IOException e) {
             e.printStackTrace();

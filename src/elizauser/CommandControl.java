@@ -41,7 +41,7 @@ public class CommandControl {
     public final void start() {
         // create UDP connection
         try {
-            mSocket = new DatagramSocket(mLocalPort);	
+            mSocket = new DatagramSocket(mLocalPort);
         } catch (SocketException ex) {
             Logger.getLogger(CommandControl.class.getName()).log(Level.SEVERE, null, ex);
         }
@@ -66,7 +66,7 @@ public class CommandControl {
         }
     }
 
- // Receive some bytes via the socket
+    // Receive some bytes via the socket
     public final byte[] recvBytes(final int size) {
         try {
             // Construct a byte array
@@ -79,12 +79,12 @@ public class CommandControl {
             // Return the buffer now
             return Arrays.copyOf(buffer, packet.getLength());
         } catch (final IOException exc) {
-            System.out.println("[CommandControl] Receiving failed"); 
+            System.out.println("[CommandControl] Receiving failed");
             return null;
         }
     }
-    
- // Receive some string via the socket
+
+    // Receive some string via the socket
     public final String recvString() {
         try {
             // Receive a byte buffer
@@ -95,13 +95,13 @@ public class CommandControl {
                 final String message
                         = new String(buffer, 0, buffer.length, "UTF-8");
                 // Print some information
-                System.out.println("[CommandControl] Message received:"+ message); 
+                System.out.println("[CommandControl] Message received:" + message);
                 // And return message
                 return message;
             }
         } catch (final UnsupportedEncodingException exc) {
             // Print some information
-            System.out.println("[CommandControl] Message not received"); 
+            System.out.println("[CommandControl] Message not received");
         }
         return null;
     }
