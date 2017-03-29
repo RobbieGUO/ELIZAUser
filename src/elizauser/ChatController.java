@@ -62,6 +62,11 @@ public class ChatController implements Initializable {
     private ColumnConstraints cc;
     private CommandControl recmd;
     private CommandControl recmdToSA;
+    
+    final int recmdLocalPort = 7770;
+    final int recmdRemotePort = 8880;
+    final int recmdToSALocalPort = 7700;
+    final int recmdToSARemotePort = 8000;
 
     private CommandReceive commandReceive;
     private String ip = "127.0.0.1";
@@ -119,12 +124,12 @@ public class ChatController implements Initializable {
                     if (ipaddress != null && !ipaddress.isEmpty()) {
                         ip = ipaddress;
                     }
-                    recmd = new CommandControl(7770, ip, 8880);
+                    recmd = new CommandControl(recmdLocalPort, ip, recmdRemotePort);
                     recmd.start();
                     commandReceive = new CommandReceive(recmd, chatController);
                     commandReceive.start();
                     
-                    recmdToSA = new CommandControl(7700, ip, 8880);
+                    recmdToSA = new CommandControl(recmdToSALocalPort, ip, recmdToSARemotePort);
                     recmdToSA.start();
                     ipLimit = false;
                 }
