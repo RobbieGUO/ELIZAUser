@@ -61,6 +61,7 @@ public class ChatController implements Initializable {
     private GridPane chatGridPane;
     private ColumnConstraints cc;
     private CommandControl recmd;
+    private CommandControl recmdToSA;
 
     private CommandReceive commandReceive;
     private String ip = "127.0.0.1";
@@ -122,6 +123,9 @@ public class ChatController implements Initializable {
                     recmd.start();
                     commandReceive = new CommandReceive(recmd, chatController);
                     commandReceive.start();
+                    
+                    recmdToSA = new CommandControl(7700, ip, 8880);
+                    recmdToSA.start();
                     ipLimit = false;
                 }
             }
@@ -163,6 +167,7 @@ public class ChatController implements Initializable {
                     });
                     rowIndex++;
                     recmd.sendString(s);
+                    recmdToSA.sendString(s);
                 }
             }
         }
